@@ -1,0 +1,5 @@
+raw
+.venv
+prepared
+.env
+__pycache__

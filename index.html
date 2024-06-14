@@ -1,0 +1,150 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Chat Interface</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        background-color: #333;
+        color: white;
+        margin: 0;
+        padding: 0;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
+      }
+      .chat-container {
+        width: 60%;
+        max-width: 800px;
+        background-color: #444;
+        padding: 20px;
+        border-radius: 10px;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        height: 80vh;
+      }
+      .message-container {
+        flex-grow: 1;
+        overflow-y: auto;
+        display: flex;
+        flex-direction: column;
+        padding-right: 10px;
+        margin-bottom: 10px;
+      }
+      .message {
+        padding: 10px 20px;
+        border-radius: 20px;
+        margin: 10px 0;
+        max-width: 70%;
+      }
+      .message.current-user {
+        background-color: #222;
+        color: white;
+        align-self: flex-end;
+        border-bottom-left-radius: 0;
+      }
+      .message.other-user {
+        background-color: white;
+        color: black;
+        align-self: flex-start;
+        border-bottom-right-radius: 0;
+      }
+      .input-container {
+        display: flex;
+        align-items: center;
+        padding: 10px;
+        background-color: #555;
+        border-radius: 10px;
+      }
+      input[type="text"] {
+        flex-grow: 1;
+        padding: 10px;
+        border: none;
+        border-radius: 5px;
+        margin-right: 10px;
+        font-size: 16px;
+      }
+      button {
+        padding: 10px 20px;
+        border: none;
+        background-color: #333;
+        color: white;
+        border-radius: 5px;
+        font-size: 16px;
+        cursor: pointer;
+      }
+      button:hover {
+        background-color: #222;
+      }
+    </style>
+    <script>
+      let history = [
+        {
+          role: "bot",
+          content: "Hello, I am Erasmus Bot. How can I help you?",
+        },
+      ];
+
+      onload = async () => {
+        const messageContainer = document.querySelector(".message-container");
+        const input = document.querySelector("input");
+        const button = document.querySelector("button");
+
+        const response = await fetch("http://localhost:5000/chat", {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+          },
+        });
+        history = await response.json();
+        rerender();
+
+        button.onclick = async () => {
+          const userMessage = input.value;
+          const div = document.createElement("div");
+          div.classList.add("message", "current-user");
+          div.textContent = userMessage;
+          messageContainer.appendChild(div);
+          const response = await fetch("http://localhost:5000/chat", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({ userMessage }),
+          });
+          history = await response.json();
+          input.value = "";
+          rerender();
+        };
+      };
+
+      function rerender() {
+        const messageContainer = document.querySelector(".message-container");
+        messageContainer.innerHTML = "";
+        history.forEach((message) => {
+          const div = document.createElement("div");
+          div.classList.add(
+            "message",
+            message.role === "assistant" ? "other-user" : "current-user",
+          );
+          div.textContent = message.content;
+          messageContainer.appendChild(div);
+        });
+      }
+    </script>
+  </head>
+  <body>
+    <div class="chat-container">
+      <div class="message-container"></div>
+      <div class="input-container">
+        <input type="text" placeholder="Type your message here..." />
+        <button type="button">Send</button>
+      </div>
+    </div>
+  </body>
+</html>

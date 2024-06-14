@@ -1,0 +1,13 @@
+azure-identity
+azure-search-documents
+azure-storage-blob
+
+nltk
+
+openai
+langchain_community
+
+python-dotenv
+
+flask
+flask-cors
